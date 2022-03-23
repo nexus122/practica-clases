@@ -25,6 +25,7 @@
             padding: 1em;
             font-family: 'VT323', monospace;
             box-shadow: 0px 0px 1em 5px rgba(3, 71, 49, 0.4);
+            transition: 1s scroll;
         }
 
         .narracion p{
@@ -147,6 +148,11 @@
         state.narracion.push(mensaje);
         mensaje = `<p>${mensaje}</p>`;        
         document.querySelector(".narracion").innerHTML += mensaje;
+
+        /* Movemos el scroll hacia el final. */
+        let alto = document.querySelector('.narracion').scrollHeight
+        document.querySelector('.narracion').scrollTop = alto;
+
     }
 
     mostrarVida();
