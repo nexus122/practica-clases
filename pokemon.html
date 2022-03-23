@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
+    <title>Pokemones</title>
+    <style>
+        .narracion {
+            display: block;
+            max-height: 300px;
+            min-height: 300px;
+            overflow-y: auto;
+            border-radius: 1em;
+            background-color: rgb(3, 71, 49);
+            color: white;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+            padding: 1em;
+        }
+
+        .LifePanel {
+            display: flex;
+            flex-wrap: nowrap;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .LifePanel p {
+            width: 50%;
+        }
+
+        .title {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <h1 class='title'>Lucha de Pokemones</h1>
+        <div class='LifePanel'>
+            <p id='pokemon1'>Vida de Squirtle <span>0</span></p>
+            <p id='pokemon2'>Vida de Bulbasur <span>0</span></p>
+        </div>
+
+        <div style="display:none" class='narracion'>
+
+        </div>
+        <p id='contador'>Veces que has luchado <span>0</span> veces</p>
+        <button class='btn-luchar'>Luchar!</button>
+        <button class='btn-danger'>Borrar LocalStorage</button>
+    </main>
+</body>
+
+</html>
+
+<script>
+    // Vamos a implementar la lucha de pokemon, Vamos a crear un marcador con la vida de pikachu y Bulbasur.
+    // Cada vez que hagamos click en luchar pikatchu ataca a bulbasaur y viceversa.
+    // Hay que actualizar la vida de los pokemons en funcion del daño recibido.
+
+    // Requisito, guardar las veces que el usuario hace click.
+
+    // Al cargar el script tenemos que comprobar si existe local Storage.
+
+    class Pokemon {
+
+        constructor(id, nombre, tipos, vida, ataque, defensa) {
+            this.id = id
+            this.nombre = nombre
+            this.tipos = tipos
+            this.vida = vida
+            this.ataque = ataque
+            this.defensa = defensa
+        }
+
+        atacar(pokemon) {
+            // Atacar al pokemon atacado el numero de puntos de vida entre 0 y ataque al pokemos atacado
+            let puntosAtaque = Math.floor(Math.random() * this.ataque, 0);
+            narracion(`${this.nombre} ataca a ${pokemon.nombre} y le hace ${puntosAtaque} de daño`)
+            pokemon.vida = pokemon.vida - puntosAtaque;
+        }
+    }
+
+    let state = {
+        click: 0,
+        narracion: [],
+        bulbasaur: new Pokemon(1, "Bulbasaur", ['Grass', 'Poison'], 60, 49, 49),
+        squirtle: new Pokemon(1, "Squirtle", ['Water'], 45, 48, 65),
+    }
+
+    if (localStorage.getItem('state')) {
+
+        /* Objeto del estado */
+        state = JSON.parse(localStorage.getItem('state'));
+        
+        state.bulbasaur = new Pokemon(1, "Bulbasaur", ['Grass', 'Poison'], state.bulbasaur.vida, 49, 49);
+        state.squirtle = new Pokemon(1, "Squirtle", ['Water'], state.squirtle.vida, 48, 65);
+
+        document.querySelector('#contador span').innerHTML = state.click;
+
+        /* Borramos la caja de narración */
+        document.querySelector(".narracion").textContent  = '';
+
+        /* Escribimos los mensajes que tenemos guardados */
+        state.narracion.forEach(mensaje => {
+            narracion(mensaje);
+        })
+
+    }
+
+    //let bulbasaur = new Pokemon(1, "Bulbasaur", ['Grass', 'Poison'], 60, 49, 49);
+    //let squirtle = new Pokemon(1, "Squirtle", ['Water'], 45, 48, 65);
+
+
+    // Ponemos la vida inicial de nuestros pokemons en sus marcadores
+    function mostrarVida() {
+        document.querySelector('#pokemon1 span').textContent = state.squirtle.vida
+        document.querySelector('#pokemon2 span').textContent = state.bulbasaur.vida
+    }
+
+    function narracion(mensaje) {
+        mensaje = `<p>${mensaje}</p>`;
+        state.narracion.push(mensaje);
+        document.querySelector(".narracion").innerHTML += mensaje;
+
+        localStorage['state'] = JSON.stringify(state);
+    }
+
+    mostrarVida();
+
+    // Asociar un evento click al boton para iniciar la lucha
+    document.querySelector('.btn-luchar').addEventListener('click', function () {
+        state.bulbasaur.atacar(state.squirtle);
+        
+        state.click++;
+        // Guardamos en el localstorage las veces que hacemos click
+        localStorage.setItem('state', JSON.stringify(state));
+        document.querySelector('#contador span').innerHTML = state.click;
+        mostrarVida();
+    });
+
+    document.querySelector('.btn-danger').addEventListener('click', function () {
+        localStorage.clear();
+        location.reload();
+    })
+
+</script>
